@@ -6,7 +6,7 @@ casino slot machine widget for KDE Plasma 6 desktop.
 
 ### From Source
 ```bash
-git clone https://github.com/YOUR_USERNAME/plasma-slot-machine.git
+git clone https://github.com/blueberriesflower/plasma-slot-machine.git
 cd plasma-slot-machine
 mkdir -p ~/.local/share/plasma/plasmoids/onedarmbandit
 cp -r . ~/.local/share/plasma/plasmoids/onedarmbandit/
