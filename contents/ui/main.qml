@@ -1,17 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
-import org.kde.plasma.core as PlasmaCore
-import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.plasmoid
 
 PlasmoidItem {
     id: root
-
-    // Устанавливаем предпочтительный и минимальный размер
-    property alias minimumWidth: root.implicitWidth
-    property alias minimumHeight: root.implicitHeight
-    implicitWidth: 320
-    implicitHeight: 480
+    preferredRepresentation: fullRepresentation
 
     // Игровые переменные
     property var symbols: ["🍒", "🍋", "🔔", "⭐", "7️⃣", "💎"]
@@ -21,6 +14,11 @@ PlasmoidItem {
     property bool spinning: false
     property string result: ""
     property bool gameOver: false
+
+    // Размерные единицы, основанные на минимальном размере
+    property real unit: Math.min(Plasmoid.width, Plasmoid.height) / 30
+    property real padding: unit * 1.5
+    property real spacing: unit
 
     // Таймеры
     Timer {
@@ -49,160 +47,152 @@ PlasmoidItem {
         }
     }
 
-    // Основной фон
-    Rectangle {
-        anchors.fill: parent
-        color: "#0f172a"
-        radius: 16
+    fullRepresentation: Item {
+        id: container
 
-        // Акцентная полоска сверху
+        // Основной фон
         Rectangle {
-            width: parent.width
-            height: 4
-            color: "#fbbf24"
-            anchors.top: parent.top
-            anchors.topMargin: 15
+            anchors.fill: parent
+            color: "#0f172a"
+            radius: unit
+
+            // Акцентная полоска сверху
+            Rectangle {
+                width: parent.width
+                height: Math.max(2, unit * 0.25)
+                color: "#fbbf24"
+                anchors.top: parent.top
+                anchors.topMargin: unit
+            }
         }
 
-        // Основной контент
+        // Основной контент с адаптивными отступами
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 20
-            spacing: 20
+            anchors.margins: padding
+            spacing: spacing
 
             // Заголовок
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: "🎰 CASINO SLOTS 🎰"
                 color: "#fbbf24"
-                font.pixelSize: 18
+                font.pixelSize: Math.max(12, unit * 1.2)
                 font.bold: true
-                font.letterSpacing: 1
+                wrapMode: Text.Wrap
+                horizontalAlignment: Text.AlignHCenter
+                Layout.maximumWidth: parent.width - padding * 2
             }
 
-            // Барабаны
-            Rectangle {
+            // Барабаны с адаптивным размером
+            Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 100
-                color: "#1e293b"
-                radius: 12
-                border.width: 2
-                border.color: spinning ? "#fbbf24" : "#334155"
+                Layout.fillHeight: true
+                Layout.minimumHeight: unit * 8
 
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 20
+                Rectangle {
+                    anchors.fill: parent
+                    color: "#1e293b"
+                    radius: unit * 0.75
+                    border.width: Math.max(1, unit * 0.15)
+                    border.color: spinning ? "#fbbf24" : "#334155"
 
-                    // Барабан 1
-                    Rectangle {
-                        width: 70
-                        height: 70
-                        radius: 10
-                        color: "#0f172a"
-                        border.width: 3
-                        border.color: spinning ? "#fbbf24" : "#475569"
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: spacing
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: reels[0]
-                            font.pixelSize: 32
-                            color: "white"
-                        }
-                    }
+                        Repeater {
+                            model: 3
 
-                    // Барабан 2
-                    Rectangle {
-                        width: 70
-                        height: 70
-                        radius: 10
-                        color: "#0f172a"
-                        border.width: 3
-                        border.color: spinning ? "#fbbf24" : "#475569"
+                            Rectangle {
+                                width: Math.min(parent.parent.width / 3.5, unit * 5)
+                                height: width
+                                radius: unit * 0.6
+                                color: "#0f172a"
+                                border.width: Math.max(2, unit * 0.25)
+                                border.color: spinning ? "#fbbf24" : "#475569"
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: reels[1]
-                            font.pixelSize: 32
-                            color: "white"
-                        }
-                    }
-
-                    // Барабан 3
-                    Rectangle {
-                        width: 70
-                        height: 70
-                        radius: 10
-                        color: "#0f172a"
-                        border.width: 3
-                        border.color: spinning ? "#fbbf24" : "#475569"
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: reels[2]
-                            font.pixelSize: 32
-                            color: "white"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: reels[index]
+                                    font.pixelSize: parent.width * 0.45
+                                    color: "white"
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Информация о игре
+            // Информация о игре - адаптивная сетка
             GridLayout {
                 Layout.fillWidth: true
-                columns: 2
-                columnSpacing: 20
-                rowSpacing: 12
+                Layout.preferredHeight: unit * 6
+                columns: width > unit * 20 ? 2 : 1
+                columnSpacing: spacing
+                rowSpacing: spacing * 0.5
 
                 // Кредиты
                 Column {
-                    spacing: 4
+                    spacing: unit * 0.25
                     Layout.fillWidth: true
 
                     Text {
                         text: "BALANCE"
                         color: "#94a3b8"
-                        font.pixelSize: 12
+                        font.pixelSize: Math.max(9, unit * 0.7)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
 
                     Text {
                         text: "$" + credits
                         color: credits > 100 ? "#10b981" : credits > 50 ? "#fbbf24" : "#ef4444"
-                        font.pixelSize: 20
+                        font.pixelSize: Math.max(14, unit * 1.3)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
                 }
 
                 // Ставка
                 Column {
-                    spacing: 4
+                    spacing: unit * 0.25
                     Layout.fillWidth: true
 
                     Text {
                         text: "CURRENT BET"
                         color: "#94a3b8"
-                        font.pixelSize: 12
+                        font.pixelSize: Math.max(9, unit * 0.7)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
 
                     Text {
                         text: "$" + bet
                         color: "#fbbf24"
-                        font.pixelSize: 20
+                        font.pixelSize: Math.max(14, unit * 1.3)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
                 }
 
-                // Статус
+                // Статус - растягиваем на 2 колонки если мало места
                 Column {
-                    spacing: 4
+                    spacing: unit * 0.25
                     Layout.fillWidth: true
+                    Layout.columnSpan: parent.columns
 
                     Text {
                         text: "STATUS"
                         color: "#94a3b8"
-                        font.pixelSize: 12
+                        font.pixelSize: Math.max(9, unit * 0.7)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
 
                     Text {
@@ -210,36 +200,35 @@ PlasmoidItem {
                         gameOver ? "GAME OVER" : "READY"
                         color: spinning ? "#8b5cf6" :
                         gameOver ? "#ef4444" : "#10b981"
-                        font.pixelSize: 14
+                        font.pixelSize: Math.max(11, unit * 1)
                         font.bold: true
+                        width: parent.width
+                        elide: Text.ElideRight
                     }
                 }
             }
 
-            // Управление ставкой
-            Rectangle {
+            // Управление ставкой - адаптивное
+            Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 50
-                color: "#1e293b"
-                radius: 10
+                Layout.preferredHeight: unit * 3.5
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 10
+                    spacing: spacing * 0.5
 
                     // Уменьшить
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 30
-                        radius: 6
+                        Layout.fillHeight: true
+                        radius: unit * 0.4
                         color: bet > 1 && !spinning && !gameOver ? "#ef4444" : "#475569"
 
                         Text {
                             anchors.centerIn: parent
                             text: "−5"
                             color: "white"
-                            font.pixelSize: 14
+                            font.pixelSize: Math.max(11, parent.height * 0.4)
                             font.bold: true
                         }
 
@@ -260,23 +249,25 @@ PlasmoidItem {
                     Text {
                         text: "BET: $" + bet
                         color: "#fbbf24"
-                        font.pixelSize: 15
+                        font.pixelSize: Math.max(12, unit * 1)
                         font.bold: true
                         Layout.alignment: Qt.AlignVCenter
+                        Layout.minimumWidth: unit * 5
+                        horizontalAlignment: Text.AlignHCenter
                     }
 
                     // Увеличить
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 30
-                        radius: 6
+                        Layout.fillHeight: true
+                        radius: unit * 0.4
                         color: bet < Math.min(credits, 100) && !spinning && !gameOver ? "#10b981" : "#475569"
 
                         Text {
                             anchors.centerIn: parent
                             text: "+5"
                             color: "white"
-                            font.pixelSize: 14
+                            font.pixelSize: Math.max(11, parent.height * 0.4)
                             font.bold: true
                         }
 
@@ -294,16 +285,16 @@ PlasmoidItem {
 
                     // MAX
                     Rectangle {
-                        Layout.preferredWidth: 60
-                        Layout.preferredHeight: 30
-                        radius: 6
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: unit * 4
+                        radius: unit * 0.4
                         color: credits > 0 && !spinning && !gameOver ? "#8b5cf6" : "#475569"
 
                         Text {
                             anchors.centerIn: parent
                             text: "MAX"
                             color: "white"
-                            font.pixelSize: 12
+                            font.pixelSize: Math.max(10, parent.height * 0.35)
                             font.bold: true
                         }
 
@@ -316,11 +307,11 @@ PlasmoidItem {
                 }
             }
 
-            // Кнопка SPIN/RESTART
+            // Кнопка SPIN/RESTART - адаптивная
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 48
-                radius: 10
+                Layout.preferredHeight: unit * 3
+                radius: unit * 0.6
                 color: {
                     if (spinning) return "#8b5cf6";
                     if (gameOver) return "#3b82f6";
@@ -334,8 +325,11 @@ PlasmoidItem {
                     gameOver ? "🔄 RESTART GAME" :
                     "🎰 SPIN ($" + bet + ")"
                     color: "white"
-                    font.pixelSize: 16
+                    font.pixelSize: Math.max(12, parent.height * 0.35)
                     font.bold: true
+                    width: parent.width * 0.9
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 MouseArea {
@@ -355,13 +349,13 @@ PlasmoidItem {
                 }
             }
 
-            // Результат
+            // Результат - адаптивный
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 40
+                Layout.preferredHeight: unit * 2.5
                 color: "#1e293b"
-                radius: 8
-                border.width: 2
+                radius: unit * 0.5
+                border.width: Math.max(1, unit * 0.1)
                 border.color: result.includes("JACKPOT") ? "#fbbf24" :
                 result.includes("WIN") ? "#10b981" :
                 result.includes("MATCH") ? "#3b82f6" :
@@ -377,18 +371,21 @@ PlasmoidItem {
                         if (result.includes("MATCH")) return "#3b82f6";
                         return "#94a3b8";
                     }
-                    font.pixelSize: 14
+                    font.pixelSize: Math.max(10, parent.height * 0.3)
                     font.bold: true
+                    width: parent.width * 0.9
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
                 }
             }
 
-            // Сообщение о GAME OVER
+            // Сообщение о GAME OVER - адаптивное
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 30
+                Layout.preferredHeight: unit * 2
                 color: "#ef444420"
-                radius: 6
-                border.width: 1
+                radius: unit * 0.4
+                border.width: Math.max(1, unit * 0.05)
                 border.color: "#ef444460"
                 visible: gameOver && credits <= 0
 
@@ -396,8 +393,11 @@ PlasmoidItem {
                     anchors.centerIn: parent
                     text: "💸 Out of credits! Click RESTART above"
                     color: "#fca5a5"
-                    font.pixelSize: 11
+                    font.pixelSize: Math.max(9, parent.height * 0.25)
                     font.bold: true
+                    width: parent.width * 0.9
+                    wrapMode: Text.Wrap
+                    horizontalAlignment: Text.AlignHCenter
                 }
             }
         }
