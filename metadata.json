@@ -11,7 +11,7 @@
         "Version": "1",
         "Category": "Utilities",
         "License": "GPL",
-        "Website": "https://example.com"
+        "Icon": "games-casino"
     },
     "X-Plasma-API-Minimum-Version": "6.0",
     "KPackageStructure": "Plasma/Applet"
