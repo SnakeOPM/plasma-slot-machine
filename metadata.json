@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Name": "OneDarmBandit",
+        "Description": "A fun slot machine widget for Plasma 6",
+        "Authors": [
+            {
+                "Name": "bebrachka"
+            }
+        ],
+        "Id": "org.kde.onedarmbandit",
+        "Version": "1",
+        "Category": "Utilities",
+        "License": "GPL",
+        "Website": "https://example.com"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "KPackageStructure": "Plasma/Applet"
+}
